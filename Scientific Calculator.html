@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Introducing our sleek and user-friendly online calculator! Designed with simplicity and convenience in mind, this calculator is your go-to tool for all your basic arithmetic needs and more.">
+  <meta name="keywords" content="scientific Calculator">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>scientific Calculator</title>
+    <style>
+        .calculator-box__main {
+            background: #fff;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            border-radius: 0.6em;
+            padding: 2em;
+            box-sizing: border-box;
+            color: #000;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .calculator-box {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        
+        .keypad button {background: #000 !important;
+            color: #fff !important;
+        }
+
+        .value {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .keypad {
+            display: grid;
+            justify-content: center;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            grid-gap: 0.5em;
+        }
+
+        .calculator-button {
+            display: inline-block;
+            color: #000000;
+            background: #e4e4e4;
+            border: none;
+            outline: 0;
+            width: 100%;
+            font-size: 1em;
+            font-weight: 300;
+            padding: 1em 0.6em;
+            border-radius: 0.6em;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .calculator-button--is-special {
+            background-color: #ced0ff;
+        }
+
+        .calculator-button[disabled] {
+            background-color: darkblue;
+            color: #fff;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="calculator-box">
+        <div class="calculator-box__main">
+            <div class="value" id="display"></div>
+            <div class="keypad">
+                <button class="calculator-button calculator-button--is-special"
+                    onclick="appendFunction('sin'); enableButtons();">sin</button>
+                    <button class="calculator-button" onclick="appendValue('1'); enableButtons();">1</button>
+                    <button class="calculator-button" onclick="appendValue('2'); enableButtons();">2</button>
+                    <button class="calculator-button" onclick="appendValue('3'); enableButtons();">3</button>
+                    <button class="calculator-button calculator-button--is-special"
+                    onclick="appendOperator('+'); disableOperators();">+</button>
+
+
+
+                <button class="calculator-button calculator-button--is-special"
+                    onclick="appendFunction('cos'); enableButtons();">cos</button>
+                    <button class="calculator-button" onclick="appendValue('4'); enableButtons();">4</button>
+                    <button class="calculator-button" onclick="appendValue('5'); enableButtons();">5</button>
+                    <button class="calculator-button" onclick="appendValue('6'); enableButtons();">6</button>
+                    <button class="calculator-button calculator-button--is-special"
+                    onclick="appendOperator('-'); disableOperators();">-</button>
+
+
+                <button class="calculator-button calculator-button--is-special"
+                    onclick="appendFunction('tan'); enableButtons();">tan</button>
+              
+                <button class="calculator-button" onclick="appendValue('7'); enableButtons();">7</button>
+                <button class="calculator-button" onclick="appendValue('8'); enableButtons();">8</button>
+                <button class="calculator-button" onclick="appendValue('9'); enableButtons();">9</button>
+                <button class="calculator-button calculator-button--is-special"
+                    onclick="appendOperator('*'); disableOperators();">x</button>
+
+                
+              
+                <button class="calculator-button calculator-button--is-special calculator-button--closing-bracket" disabled onclick="appendValue(')')">)</button>
+                <button class="calculator-button" disabled onclick="clearDisplay()">C</button>
+                <button class="calculator-button" disabled onclick="appendValue('0')">0</button>
+                <button class="calculator-button" disabled onclick="appendValue('.')">.</button>
+                <button class="calculator-button calculator-button--is-special"
+                onclick="appendValue('/'); disableOperators();">÷</button>
+                <button style="grid-column: span 5;" class="calculator-button calculator-button--is-special" disabled onclick="calculate()">=</button>
+            </div>
+        </div>
+        <div class="calculator-box__history"> </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        let expression = '';
+        let openBrackets = 0;
+        let closeBrackets = 0;
+
+        function appendFunction(func) {
+            expression += func + '(';
+            display.textContent = expression;
+            enableButtons();
+        }
+
+        function appendOperator(operator) {
+            expression += operator;
+            display.textContent = expression;
+            enableButtons();
+        }
+
+        function appendValue(value) {
+            expression += value;
+            display.textContent = expression;
+            enableButtons();
+        }
+
+        function calculate() {
+            try {
+                // Replace trigonometric functions with their JavaScript equivalents
+                expression = expression.replace(/sin/g, 'Math.sin');
+                expression = expression.replace(/cos/g, 'Math.cos');
+                expression = expression.replace(/tan/g, 'Math.tan');
+
+                const result = eval(expression);
+                display.textContent = result;
+                expression = result.toString();
+            } catch (error) {
+                display.textContent = 'Error';
+                expression = '';
+            }
+        }
+
+        function clearDisplay() {
+            display.textContent = '';
+            expression = '';
+            enableButtons();
+        }
+
+        function enableButtons() {
+            // Count open and close brackets
+            openBrackets = (expression.match(/\(/g) || []).length;
+            closeBrackets = (expression.match(/\)/g) || []).length;
+
+            // Enable/disable closing bracket button based on open and close brackets count
+            if (openBrackets > closeBrackets) {
+                document.querySelector('.calculator-button--closing-bracket').removeAttribute('disabled');
+            } else {
+                document.querySelector('.calculator-button--closing-bracket').setAttribute('disabled', 'disabled');
+            }
+
+            // Enable/disable other buttons
+            document.querySelectorAll('.calculator-button').forEach(button => {
+                if (!button.classList.contains('calculator-button--closing-bracket')) {
+                    button.removeAttribute('disabled');
+                }
+            });
+        }
+
+        function disableOperators() {
+            document.querySelectorAll('.calculator-button.calculator-button--is-special').forEach(button => {
+                button.setAttribute('disabled', 'disabled');
+            });
+        }
+    </script>
+
+</body>
+
+</html>
